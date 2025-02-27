@@ -29,7 +29,7 @@ log() {
 
 # 创建目录
 log "$YELLOW" "创建目录..."
-mkdir -p "$CONF_DIR/sing-box" "$CONF_DIR/clash" "$CONF_DIR/clash/sub" "$CONF_DIR/clash/ui" "$CONF_DIR/tun2socks" "$CONF_DIR/mosdns" || log "$RED" "目录创建失败！"
+mkdir -p "$CONF_DIR/sing-box" "$CONF_DIR/clash" "$CONF_DIR/clash/sub" "$CONF_DIR/clash/ui" "$CONF_DIR/tun2socks" "$CONF_DIR/mosdns" "$CONF_DIR/mosdns/rule" || log "$RED" "目录创建失败！"
 
 # 复制文件
 log "$YELLOW" "复制文件..."
@@ -39,6 +39,7 @@ cp -f www/* "$WWW_DIR/" || log "$RED" "www 文件复制失败！"
 cp -f menu/* "$MODELS_DIR/" || log "$RED" "menu 文件复制失败！"
 cp -R sub/* "$CONF_DIR/clash/sub/" || log "$RED" "sub 文件复制失败！"
 cp -R ui/* "$CONF_DIR/clash/ui/" || log "$RED" "ui 文件复制失败！"
+cp -R rule/* "$CONF_DIR/mosdns/rule" || log "$RED" "rule 文件复制失败！"
 cp rc.d/* "$RC_DIR/" || log "$RED" "rc.d 文件复制失败！"
 cp geo/* "$CONF_DIR/mosdns/" || log "$RED" "geo 文件复制失败！"
 cp geo/* "$CONF_DIR/clash/" || log "$RED" "geo 文件复制失败！"
@@ -94,12 +95,6 @@ for service in singbox clash mosdns tun2socks; do
     log "$CYAN" "状态:   service $service status"
     echo ""
 done
-
-log "$YELLOW" "clash 订阅功能..."
-log "$GREEN" "请在/usr/local/etc/clash/sub/env文件填入订阅地址。"
-log "$GREEN" "修改/usr/local/etc/clash/sub/temp/templete_config.yaml订阅模板。"
-log "$GREEN" "然后运行 sub 命令使用订阅，并参照博客文章添加自动订阅功能。"
-echo ""
 
 # 完成提示
 log "$GREEN" "安装完成，进入Web界面，刷新浏览器，然后导航到服务 > 代理管理菜单进行操作。"
