@@ -65,10 +65,10 @@ for service in clash mosdns tun2socks; do
 	chmod +x /usr/bin/sub
 done
 
-# 安装zsh
-log "$GREEN" "安装 zsh"
-pkg add -f pkg/zsh-5.9_5.pkg
-log "$GREEN" "zsh安装完成！"
+# 安装bash
+log "$GREEN" "安装 bash"
+pkg install -y bash
+log "$GREEN" "bash安装完成！"
 echo ""
 
 # 添加服务启动项
