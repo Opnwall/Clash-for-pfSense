@@ -11,10 +11,10 @@ define('LOG_FILE', '/var/log/sub.log');
 // 使用 pfSense 的选项卡函数生成菜单
 $tab_array = [
     1 => [gettext("Clash"), false, "services_clash.php"],
-    4 => [gettext("Sing-Box"), false, "services_sing_box.php"],
-    5 => [gettext("Tun2Socks"), false, "services_tun2socks.php"],
-    2 => [gettext("MosDNS"), false, "services_mosdns.php"],
-    3 => [gettext("Sub"), true, "sub.php"],
+    2 => [gettext("Sing-Box"), false, "services_sing_box.php"],
+    3 => [gettext("Tun2Socks"), false, "services_tun2socks.php"],
+    4 => [gettext("MosDNS"), false, "services_mosdns.php"],
+    5 => [gettext("Sub"), true, "sub.php"],
 ];
 
 display_top_tabs($tab_array);

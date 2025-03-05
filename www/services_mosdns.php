@@ -12,12 +12,13 @@ $log_file = "/var/log/mosdns.log";
 $message = "";
 
 // 使用 pfSense 的选项卡函数生成菜单
-$tab_array = array();
-$tab_array[1] = array(gettext("Clash"), false, "services_clash.php");
-$tab_array[4] = array(gettext("Sing-Box"), false, "services_sing_box.php");
-$tab_array[5] = array(gettext("Tun2Socks"), false, "services_tun2socks.php");
-$tab_array[2] = array(gettext("MosDNS"), false, "services_mosdns.php");
-$tab_array[3] = array(gettext("Sub"), false, "sub.php");
+$tab_array = [
+    1 => [gettext("Clash"), false, "services_clash.php"],
+    2 => [gettext("Sing-Box"), false, "services_sing_box.php"],
+    3 => [gettext("Tun2Socks"), false, "services_tun2socks.php"],
+    4 => [gettext("MosDNS"), true, "services_mosdns.php"],
+    5 => [gettext("Sub"), false, "sub.php"],
+];
 
 display_top_tabs($tab_array);
 
