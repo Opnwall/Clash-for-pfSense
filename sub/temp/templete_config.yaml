@@ -1,8 +1,9 @@
 port: 7890
-allow-lan: true
+socks-port: 7891
 mode: rule
 ipv6: true
 log-level: info
+allow-lan: true
 unified-delay: true
 global-client-fingerprint: chrome
 external-controller: '0.0.0.0:9090'
