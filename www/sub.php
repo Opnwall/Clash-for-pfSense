@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 清空日志文件
         clear_log();
 
-        // 保存订阅地址和安全密钥
+        // 保存订阅地址和访问密钥
         $url_saved = save_env_variable('CLASH_URL', $url);
         $secret_saved = save_env_variable('CLASH_SECRET', $secret);
 
@@ -108,9 +108,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($secret_saved) {
-            log_message("安全密钥已保存。");
+            log_message("访问密钥已保存。");
         } else {
-            echo "<div class='alert alert-danger'>保存安全密钥失败！</div>";
+            echo "<div class='alert alert-danger'>保存访问密钥失败！</div>";
         }
 
         // 刷新页面
@@ -147,7 +147,7 @@ $log_content = file_exists(LOG_FILE) ? htmlspecialchars(file_get_contents(LOG_FI
             </div>
             <div class="form-group">
                 <label for="clash_secret">访问密钥：</label>
-                <input type="text" id="clash_secret" name="clash_secret" value="<?php echo htmlspecialchars($current_secret); ?>" class="form-control" placeholder="输入安全密钥" autocomplete="off" />
+                <input type="text" id="clash_secret" name="clash_secret" value="<?php echo htmlspecialchars($current_secret); ?>" class="form-control" placeholder="输入访问密钥" autocomplete="off" />
                 <button type="submit" name="save" class="btn btn-primary"><i class="fa fa-save"></i> 保存设置</button>
                 <button type="submit" name="action" value="立即订阅" class="btn btn-success" /><i class="fa fa-sync"></i> 开始订阅</button>
             </div>
