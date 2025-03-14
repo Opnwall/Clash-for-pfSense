@@ -97,5 +97,6 @@ for service in singbox clash mosdns tun2socks; do
 done
 
 # 完成提示
+log "$GREEN" "本次更新，tun2socks使用了hev-socks5-tunnel核心，配置方法与tun2socks相同。"
 log "$GREEN" "安装完成，进入Web界面，刷新浏览器，然后导航到服务 > 代理管理菜单进行操作。"
 echo ""
