@@ -11,23 +11,30 @@ rcvar="tun2socks_enable"
 pidfile="/var/run/${name}.pid"
 logfile="/var/log/${name}.log"
 command="/usr/local/bin/tun2socks"
-command_args="--config /usr/local/etc/tun2socks/config.yaml"
+command_args="/usr/local/etc/tun2socks/config.yaml"
 
 start_cmd="${name}_start"
 stop_cmd="${name}_stop"
 restart_cmd="${name}_restart"
 status_cmd="${name}_status"
 
-
 tun2socks_start() {
+    if [ ! -f "/usr/local/etc/tun2socks/config.yaml" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Config file /usr/local/etc/tun2socks/config.yaml not found." | tee -a "$logfile"
+        return 1
+    fi
     if [ -f "$pidfile" ] && kill -0 $(cat "$pidfile") 2>/dev/null; then
         echo "${name} is already running." | tee -a "$logfile"
         return 1
     fi
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting ${name}..." | tee -a "$logfile"
-    nohup ${command} ${command_args} >> "$logfile" 2>&1 &
-    echo $! > "$pidfile"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - ${name} started successfully." | tee -a "$logfile"
+    /usr/sbin/daemon -p "$pidfile" ${command} ${command_args} >> "$logfile" 2>&1
+    if [ $? -eq 0 ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - ${name} started successfully." | tee -a "$logfile"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to start ${name}." | tee -a "$logfile"
+        return 1
+    fi
 }
 
 tun2socks_stop() {
@@ -36,8 +43,12 @@ tun2socks_stop() {
         return 1
     fi
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Stopping ${name}..." | tee -a "$logfile"
-    kill $(cat "$pidfile") && rm -f "$pidfile"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - ${name} has stopped." | tee -a "$logfile"
+    if kill $(cat "$pidfile") && rm -f "$pidfile"; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - ${name} has stopped." | tee -a "$logfile"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to stop ${name}." | tee -a "$logfile"
+        return 1
+    fi
 }
 
 tun2socks_restart() {
@@ -54,5 +65,6 @@ tun2socks_status() {
         echo "tun2socks is not running."
     fi
 }
+
 load_rc_config $name
 run_rc_command "$1"
