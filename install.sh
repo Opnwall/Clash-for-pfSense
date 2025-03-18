@@ -34,6 +34,9 @@ mkdir -p "$CONF_DIR/sing-box" "$CONF_DIR/clash" "$CONF_DIR/clash/sub" "$CONF_DIR
 # 复制文件
 log "$YELLOW" "复制文件..."
 log "$YELLOW" "生成菜单..."
+log "$YELLOW" "添加权限..."
+chmod +x bin/*
+chmod +x rc.d/*
 cp -f bin/* "$BIN_DIR/" || log "$RED" "bin 文件复制失败！"
 cp -f www/* "$WWW_DIR/" || log "$RED" "www 文件复制失败！"
 cp -f menu/* "$MODELS_DIR/" || log "$RED" "menu 文件复制失败！"
@@ -48,28 +51,19 @@ cp conf/config_clash.yaml "$CONF_DIR/clash/config.yaml" || log "$RED" "clash 配
 cp conf/config_sing-box.json "$CONF_DIR/sing-box/config.json" || log "$RED" "sing-box 配置文件复制失败！"
 cp conf/config_tun2socks.yaml "$CONF_DIR/tun2socks/config.yaml" || log "$RED" "tun2socks 配置文件复制失败！"
 
+# 安装bash
+log "$GREEN" "安装 bash"
+pkg install -y bash
+log "$GREEN" "bash安装完成！"
+echo ""
+
 # 新建订阅程序
 log "$YELLOW" "添加订阅程序..."
 cat>/usr/bin/sub<<EOF
 # 启动clash订阅程序
 bash /usr/local/etc/clash/sub/sub.sh
 EOF
-
-# 设置执行权限
-log "$YELLOW" "设置执行权限..."
-for service in clash mosdns tun2socks; do
-    chmod +x "$BIN_DIR/$service"
-    chmod +x "$RC_DIR/$service"
-	chmod +x /usr/local/etc/rc.d/singbox
-	chmod +x /usr/local/bin/sing-box
-	chmod +x /usr/bin/sub
-done
-
-# 安装bash
-log "$GREEN" "安装 bash"
-pkg install -y bash
-log "$GREEN" "bash安装完成！"
-echo ""
+chmod +x /usr/bin/sub
 
 # 添加服务启动项
 log "$YELLOW" "配置服务启动项..."
@@ -97,6 +91,5 @@ for service in singbox clash mosdns tun2socks; do
 done
 
 # 完成提示
-log "$GREEN" "本次更新，tun2socks使用了hev-socks5-tunnel核心，配置方法与tun2socks相同。"
 log "$GREEN" "安装完成，进入Web界面，刷新浏览器，然后导航到服务 > 代理管理菜单进行操作。"
 echo ""
