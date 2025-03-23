@@ -32,7 +32,7 @@ function handleServiceAction($action)
         return "无效的操作！";
     }
 
-    // 清空日志文件（仅在启动或重启时）
+    // 清空日志文件（重启时）
     if ($action === 'restart') {
         file_put_contents("/var/log/clash.log", ""); // 清空日志文件
     }
