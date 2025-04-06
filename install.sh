@@ -84,5 +84,5 @@ for service in singbox clash mosdns tun2socks; do
 done
 
 # 完成提示
-log "$GREEN" "安装完成，请刷新浏览器，然后进入Web界面，导航到VPN > Proxy Suite进行操作。"
+log "$GREEN" "安装完成，请刷新浏览器，然后导航到VPN > Proxy Suite进行操作。"
 echo ""
