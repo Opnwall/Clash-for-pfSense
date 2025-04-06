@@ -19,6 +19,7 @@ WWW_DIR="$ROOT/www"
 CONF_DIR="$ROOT/etc"
 MODELS_DIR="$ROOT/share/pfSense/menu/"
 RC_DIR="$ROOT/etc/rc.d"
+RC_CONF="/etc/rc.conf.d/"
 
 # 定义日志函数
 log() {
@@ -64,14 +65,8 @@ EOF
 chmod +x /usr/bin/sub
 
 # 添加服务启动项
-log "$YELLOW" "配置服务启动项..."
-sysrc singbox_enable="YES"
-sysrc mosdns_enable="YES"
-sysrc clash_enable="YES"
-sysrc tun2socks_enable="YES"
-echo ""
-log "$GREEN" "注意：请备份/etc/rc.conf文件，以便在系统升级或重置后恢复插件功能。"
-echo ""
+log "$YELLOW" "配置系统服务..."
+cp -f rc.conf/* "$RC_CONF/" || log "$RED" "rc.conf 文件复制失败！"
 
 # 开机启动服务
 log "$YELLOW" "开机启动服务..."
@@ -89,5 +84,5 @@ for service in singbox clash mosdns tun2socks; do
 done
 
 # 完成提示
-log "$GREEN" "安装完成，进入Web界面，刷新浏览器，然后导航到服务 > 代理管理菜单进行操作。"
+log "$GREEN" "安装完成，请刷新浏览器，然后进入Web界面，导航到VPN > Proxy Suite进行操作。"
 echo ""
