@@ -1,2 +1,2 @@
-export CLASH_URL='http://pfchina.org/c/?token=0bb1f273e70bcc89064bf3bfcabf5cd1&client=clash'
+export CLASH_URL='http://pfchina.org/'
 export CLASH_SECRET='123456'
