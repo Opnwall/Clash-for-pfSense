@@ -36,11 +36,8 @@ mkdir -p "$CONF_DIR/clash" "$CONF_DIR/clash/sub" "$CONF_DIR/clash/ui" "$CONF_DIR
 
 # 复制文件
 log "$YELLOW" "复制文件..."
-sleep 1
 log "$YELLOW" "生成菜单..."
-sleep 1
 log "$YELLOW" "添加权限..."
-sleep 1
 chmod +x bin/*
 chmod +x rc.d/*
 cp -f bin/* "$BIN_DIR/" || log "$RED" "bin 文件复制失败！"
@@ -68,7 +65,6 @@ if ! pkg info -q pfSense-pkg-Shellcmd > /dev/null 2>&1; then
 fi
 
 # 新建订阅程序
-sleep 1
 log "$YELLOW" "添加订阅程序..."
 cat>/usr/bin/sub<<EOF
 # 启动clash订阅程序
@@ -77,12 +73,10 @@ EOF
 chmod +x /usr/bin/sub
 
 # 添加服务启动项
-sleep 1
 log "$YELLOW" "配置系统服务..."
 cp -f rc.conf/* "$RC_CONF/" || log "$RED" "rc.conf 文件复制失败！"
 
 # 备份现有配置
-sleep 1
 log "$YELLOW" "备份配置文件..."
 cp "$CONFIG_FILE" "$BACKUP_FILE" || {
   log "$RED" "备份失败"
@@ -97,7 +91,7 @@ echo ""
 # 添加Tun接口
 sleep 1
 log "$YELLOW" "添加tun接口..."
-if grep -q "<if>tun3000</if>" "$CONFIG_FILE"; then
+if grep -q "<if>tun_3000</if>" "$CONFIG_FILE"; then
   echo "TUN接口已存在，跳过"
 else
   awk '
@@ -105,7 +99,7 @@ else
     print
     print "    <opt10>"
     print "      <descr><![CDATA[tun]]></descr>"
-    print "      <if>tun3000</if>"
+    print "      <if>tun_3000</if>"
     print "      <spoofmac></spoofmac>"
     print "      <enable></enable>"
     print "      <ipaddr>10.10.0.1</ipaddr>"
@@ -153,7 +147,27 @@ if grep -q "<name>CN_IP</name>" "$CONFIG_FILE"; then
   echo "同名别名已存在，跳过"
 else
   awk '
-  /<aliases>/ {
+  BEGIN { inserted=0 }
+
+  # 情况1：空的 <aliases></aliases> 标签
+  /<aliases>[[:space:]]*<\/aliases>/ && !inserted {
+    print "  <aliases>"
+    print "    <alias>"
+    print "      <name>CN_IP</name>"
+    print "      <type>urltable</type>"
+    print "      <url>https://ispip.clang.cn/all_cn.txt</url>"
+    print "      <updatefreq>7</updatefreq>"
+    print "      <address>https://ispip.clang.cn/all_cn.txt</address>"
+    print "      <descr><![CDATA[中国IP段，七天更新一次。]]></descr>"
+    print "      <detail><![CDATA[中国IP段，七天更新一次。]]></detail>"
+    print "    </alias>"
+    print "  </aliases>"
+    inserted=1
+    next
+  }
+
+  # 情况2：非空 <aliases> 标签，插在标签后
+  /<aliases>/ && !inserted {
     print
     print "    <alias>"
     print "      <name>CN_IP</name>"
@@ -164,6 +178,7 @@ else
     print "      <descr><![CDATA[中国IP段，七天更新一次。]]></descr>"
     print "      <detail><![CDATA[中国IP段，七天更新一次。]]></detail>"
     print "    </alias>"
+    inserted=1
     next
   }
   { print }
@@ -172,118 +187,105 @@ else
 fi
 echo " "
 
+# 更改 unbound 端口为 5355
+  sleep 1
+  log "$YELLOW" "更改Unbound端口..."
+
+  PORT_OK=$(awk '
+  BEGIN { in_unbound = 0 }
+  /<unbound>/ { in_unbound = 1 }
+  /<\/unbound>/ { in_unbound = 0 }
+  in_unbound && /<port>5355<\/port>/ { print "yes"; exit }
+  ' "$CONFIG_FILE")
+
+if [ "$PORT_OK" = "yes" ]; then
+  echo "端口已经为5355，跳过"
+else
+  # 修改或插入 <port> 标签
+  awk '
+  BEGIN { in_unbound = 0; port_found = 0 }
+  /<unbound>/ {
+    in_unbound = 1
+    print
+    next
+  }
+  /<\/unbound>/ {
+    if (in_unbound && port_found == 0) {
+      print "		<port>5355</port>"
+    }
+    in_unbound = 0
+    print
+    next
+  }
+  {
+    if (in_unbound && /<port>.*<\/port>/) {
+      sub(/<port>.*<\/port>/, "<port>5355</port>")
+      port_found = 1
+    }
+    print
+  }
+  ' "$CONFIG_FILE" > "$TMP_FILE"
+
+  if [ -s "$TMP_FILE" ]; then
+    mv "$TMP_FILE" "$CONFIG_FILE"
+    echo "端口已修改为5355"
+  else
+    log "$RED" "修改失败，请检查配置文件"
+  fi
+fi
+echo " "
+
 # 添加防火墙规则
 sleep 1
 log "$YELLOW" "添加防火墙规则..."
-if grep -q "<destination><address>CN_IP</address><not></not></destination>" "$CONFIG_FILE"; then
+if grep -q "<tracker>88888888</tracker>" "$CONFIG_FILE"; then
   echo "同名规则已存在，跳过"
 else
   awk '
+  BEGIN { inserted = 0 }
   /<filter>/ {
     print
+    next
+  }
+  /<rule>/ && inserted == 0 {
     print "    <rule>"
     print "      <id></id>"
-    print "      <tracker>0100000101</tracker>"
+    print "      <tracker>88888888</tracker>"
     print "      <type>pass</type>"
     print "      <interface>lan</interface>"
     print "      <ipprotocol>inet</ipprotocol>"
+    print "      <tag></tag>"
+    print "      <tagged></tagged>"
+    print "      <direction>in</direction>"
+    print "      <quick>yes</quick>"
+    print "      <floating>yes</floating>"
+    print "      <max></max>"
+    print "      <max-src-nodes></max-src-nodes>"
+    print "      <max-src-conn></max-src-conn>"
+    print "      <max-src-states></max-src-states>"
+    print "      <statetimeout></statetimeout>"
+    print "      <statepolicy></statepolicy>"
     print "      <statetype><![CDATA[keep state]]></statetype>"
-    print "      <source><network>lan</network></source>"
-    print "      <destination><address>CN_IP</address><not></not></destination>"
-    print "      <descr><![CDATA[国外IP走TUN]]></descr>"
+    print "      <pflow></pflow>"
+    print "      <os></os>"
+    print "      <srcmac></srcmac>"
+    print "      <dstmac></dstmac>"
+    print "      <source>"
+    print "        <network>lan</network>"
+    print "      </source>"
+    print "      <destination>"
+    print "        <address>CN_IP</address>"
+    print "        <not></not>"
+    print "      </destination>"
+    print "      <descr><![CDATA[Foreign IP diversion tun gateway]]></descr>"
     print "      <gateway>tun</gateway>"
+    print "      <bridgeto></bridgeto>"
     print "    </rule>"
-    next
+    inserted = 1
   }
   { print }
   ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
   echo "防火墙规则添加成功"
-fi
-echo " "
-
-# 更改 unbound 端口为 5355
-sleep 1
-log "$YELLOW" "更改Unbound端口..."
-PORT_OK=$(awk '
-BEGIN { in_unbound = 0 }
-/<unbound>/ { in_unbound = 1 }
-/<\/unbound>/ { in_unbound = 0 }
-in_unbound && /<port>5355<\/port>/ { print "yes"; exit }
-' "$CONFIG_FILE")
-if [ "$PORT_OK" = "yes" ]; then
-  echo "端口已经为5355，跳过"
-else
-  # 执行替换
-  awk '
-  BEGIN { in_unbound = 0 }
-  /<unbound>/ { in_unbound = 1 }
-  /<\/unbound>/ { in_unbound = 0 }
-  {
-    if (in_unbound && /<port>.*<\/port>/) {
-      sub(/<port>.*<\/port>/, "<port>5355</port>")
-    }
-    print
-  }
-  ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
-
-  if [ $? -eq 0 ]; then
-    echo "端口已修改为5355"
-  else
-    log "$RED" "修改失败，请检查配置文件格式"
-    exit 1
-  fi
-fi
-echo ""
-
-# 检查是否已存在添加服务列表
-sleep 1
-log "$YELLOW" "添加服务列表..."
-if grep -q "<executable>tun2socks</executable>" "$CONFIG_FILE"; then
-  echo "服务列表已存在，跳过"
-else
-  awk '
-  BEGIN { inserted = 0 }
-  {
-    print
-    if ($0 ~ /<\/menu>/) {
-      last_menu = NR
-    }
-    line[NR] = $0
-  }
-  END {
-    for (i = 1; i <= NR; i++) {
-      print line[i]
-      if (i == last_menu && inserted == 0) {
-        print "		<service>"
-        print "			<name>tun2socks</name>"
-        print "			<rcfile>tun2socks</rcfile>"
-        print "			<executable>tun2socks</executable>"
-        print "			<description><![CDATA[tun 转 socks]]></description>"
-        print "		</service>"
-        print "		<service>"
-        print "			<name>mosdns</name>"
-        print "			<rcfile>mosdns</rcfile>"
-        print "			<executable>mosdns</executable>"
-        print "			<description><![CDATA[强大的 DNS 工具]]></description>"
-        print "		</service>"
-        print "		<service>"
-        print "			<name>clash</name>"
-        print "			<rcfile>clash</rcfile>"
-        print "			<executable>clash</executable>"
-        print "			<description><![CDATA[Clash 代理服务]]></description>"
-        print "		</service>"
-        inserted = 1
-      }
-    }
-  }
-  ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
-
-  if [ $? -eq 0 ]; then
-    echo "服务列表添加成功"
-  else
-    log "$RED" "修改失败，请检查配置文件格式"
-    exit 1
-  fi
 fi
 echo " "
 
@@ -334,11 +336,11 @@ echo " "
 # 重启所有服务
 sleep 1
 log "$YELLOW" "正在应用所有更改，请稍等..."
-/usr/local/etc/rc.reload_all >/dev/null 2>&1
+/etc/rc.reload_all >/dev/null 2>&1
 echo "所有服务已重新加载"
 echo ""
 
 # 完成提示
 sleep 1
-log "$GREEN" "代理全家桶安装完毕，请刷新浏览器，导航到VPN > Proxy Suite 进行配置。"
+log "$GREEN" "代理全家桶安装完毕，请刷新浏览器，导航到VPN > Proxy Suite 修改配置。 配置完成以后，建议重启防火墙，让配置生效。"
 echo ""
