@@ -1,5 +1,5 @@
 tunnel:
-  name: tun3000
+  name: tun_3000
   mtu: 9000
   multi-queue: true
   ipv4: 198.18.0.1
