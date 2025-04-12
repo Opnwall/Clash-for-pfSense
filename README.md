@@ -1,7 +1,7 @@
 ## pfSense代理套件
 一键安装代理工具脚本，用于在pfSense上运行Clash、Tun2socks和Mosdns。支持Clash订阅转换、透明代理和DNS分流。带Web控制界面，可以进行配置修改、程序控制、日志查看。 在pfSense plus 25.03(beta)上测试通过。
 
-![](images/install.png)
+![](images/proxy.png)
 
 ## 项目源代码
 该项目集成了以下工具：
@@ -32,7 +32,7 @@ sh install.sh
 ```
 
 如下图所示：
-![](images/proxy.png)
+![](images/install.png)
 
 ## 使用方法
 请参考以下文章：
