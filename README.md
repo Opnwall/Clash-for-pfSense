@@ -35,7 +35,7 @@ sh install.sh
 
 ## 使用方法
 请参考以下文章：
-[pfSense代理全家桶安装配置教程](https://pfchina.org/?p=14123)
+[clash for pfSense 安装配置教程](https://pfchina.org/?p=14123)
 
 ## 常见问题
 如果订阅转换不起作用，可以使用[SublinkX](https://github.com/gooaclok819/sublinkX)工具搭建自己的订阅转换平台。
