@@ -1,5 +1,5 @@
-## pfSense代理套件
-代理工具安装包，用于在pfSense上运行Clash、Sing-Box、Tun2socks、Mosdns，以实现代理访问功能。支持Clash订阅转换、透明代理和DNS分流。带Web控制界面，可以进行配置修改、程序控制、日志查看。 在pfSense plus 25.03(beta)上测试通过。
+## clash for pfSense
+Clash代理安装脚本，用于在pfSense上运行Clash、Tun2socks、Mosdns，以实现代理访问功能。支持Clash订阅转换、透明代理和DNS分流。带Web控制界面，可以进行配置修改、程序控制、日志查看。 在pfSense plus 25.03(beta)上测试通过。
 
 ![](images/proxy.png)
 
@@ -7,8 +7,6 @@
 该项目集成了以下工具：
 
 [Mosdns](https://github.com/IrineSistiana/mosdns) 
-
-[sing-box](https://github.com/SagerNet/sing-box) 
 
 [MetaCubeXD](https://github.com/MetaCubeX/metacubexd) 
 
