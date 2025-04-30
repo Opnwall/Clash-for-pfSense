@@ -1,7 +1,7 @@
 <?php
 require_once("guiconfig.inc");
 
-$pgtitle = [gettext('Services'), gettext('MosDNS')];
+$pgtitle = [gettext('VPN'), gettext('MosDNS')];
 include("head.inc");
 
 // 配置文件路径

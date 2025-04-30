@@ -1,7 +1,7 @@
 <?php
 require_once("guiconfig.inc");
 
-$pgtitle = [gettext('Services'), gettext('tun2socks')];
+$pgtitle = [gettext('VPN'), gettext('tun2socks')];
 include("head.inc");
 
 // 配置文件和日志路径

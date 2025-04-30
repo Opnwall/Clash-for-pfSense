@@ -1,7 +1,7 @@
 <?php
 require_once("guiconfig.inc");
 
-$pgtitle = [gettext('Services'), gettext('订阅管理')];
+$pgtitle = [gettext('VPN'), gettext('订阅管理')];
 include("head.inc");
 
 // 配置文件路径
