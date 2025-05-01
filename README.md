@@ -1,6 +1,8 @@
 ## Clash for pfSense
 Clash安装工具，用于运行Clash、Tun2socks、Mosdns，在pfSense上实现透明代理。支持Clash订阅转换、DNS分流。带Web控制界面，可以进行配置修改、程序控制、日志查看。 在pfSense plus 25.03(beta)上测试通过。
 
+![](images/proxy.png)
+
 ## 项目源代码
 该项目集成了以下工具：
 
@@ -27,6 +29,8 @@ Clash安装工具，用于运行Clash、Tun2socks、Mosdns，在pfSense上实现
 ```bash
 sh install.sh
 ```
+![](images/install.png)
+
 ## 使用方法
 请参考以下文章：
 
