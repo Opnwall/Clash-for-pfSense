@@ -45,21 +45,23 @@ function clear_log($log_file = LOG_FILE) {
  * @return bool 是否保存成功
  */
 function save_env_variable($key, $value, $env_file = ENV_FILE) {
-    if (empty($key) || empty($value)) {
+    if (empty($key) || empty($value)) return false;
+
+    $lines = file_exists($env_file) ? file($env_file, FILE_IGNORE_NEW_LINES) : [];
+    $new_lines = [];
+    foreach ($lines as $line) {
+        if (!preg_match("/^export {$key}=.*$/", $line)) {
+            $new_lines[] = $line;
+        }
+    }
+    $new_lines[] = "export {$key}='{$value}'";
+    try {
+        file_put_contents($env_file, implode("\n", $new_lines) . "\n", LOCK_EX);
+        return true;
+    } catch (Exception $e) {
+        error_log("环境变量保存失败: " . $e->getMessage());
         return false;
     }
-
-    $env_content = "export {$key}='{$value}'\n";
-    $fp = fopen($env_file, 'a');
-    if (flock($fp, LOCK_EX)) {
-        fwrite($fp, $env_content);
-        fflush($fp);
-        flock($fp, LOCK_UN);
-        fclose($fp);
-        return true;
-    }
-    fclose($fp);
-    return false;
 }
 
 /**
