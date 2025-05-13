@@ -162,7 +162,7 @@ $log_content = file_exists(LOG_FILE) ? htmlspecialchars(file_get_contents(LOG_FI
         <h2 class="panel-title">实时日志</h2>
     </div>
     <div class="form-group">
-        <textarea name="log_content" rows="23" class="form-control"><?php echo $log_content; ?></textarea>
+        <textarea name="log_content" rows="20" class="form-control"><?php echo $log_content; ?></textarea>
     </div>
 </div>
 
