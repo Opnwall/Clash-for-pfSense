@@ -2,7 +2,7 @@
 
 ##############  代理安装脚本  #################
 echo -e ''
-echo -e "\033[32m====== Clash for pfSense 代理全家桶一键安装脚本 ======\033[0m"
+echo -e "\033[32m====== clash for pfSense 代理全家桶一键安装脚本 ======\033[0m"
 echo -e ''
 
 # 定义颜色变量
@@ -56,6 +56,12 @@ sleep 1
 log "$YELLOW" "安装bash..."
 if ! pkg info -q bash > /dev/null 2>&1; then
   pkg install -y bash > /dev/null 2>&1
+fi
+
+# 安装cron
+log "$YELLOW" "安装cron..."
+if ! pkg info -q pfSense-pkg-Cron > /dev/null 2>&1; then
+  pkg install -y pfSense-pkg-Cron > /dev/null 2>&1
 fi
 
 # 安装shellcmd
@@ -143,7 +149,7 @@ echo " "
 # 添加CN_IP别名
 sleep 1
 log "$YELLOW" "添加CN_IP别名..."
-if grep -q "<name>CN_IP</name>" "$CONFIG_FILE"; then
+if grep -q "<url>https://ispip.clang.cn/all_cn.txt</url>" "$CONFIG_FILE"; then
   echo "同名别名已存在，跳过"
 else
   awk '
@@ -332,6 +338,120 @@ awk '
 ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
 fi
 echo " "
+
+# 添加服务列表项 
+sleep 1
+log "$YELLOW" "添加服务列表项..."
+# 定义要添加的内容
+NEW_SERVICES="        <service>
+          <name>tun2socks</name>
+          <rcfile>tun2socks</rcfile>
+          <executable>tun2socks</executable>
+          <description><![CDATA[tun转socks]]></description>
+        </service>
+        <service>
+          <name>mosdns</name>
+          <rcfile>mosdns</rcfile>
+          <executable>mosdns</executable>
+          <description><![CDATA[强大的DNS工具]]></description>
+        </service>
+        <service>
+          <name>clash</name>
+          <rcfile>clash</rcfile>
+          <executable>clash</executable>
+          <description><![CDATA[Clash代理服务]]></description>
+        </service>
+"
+# 检查配置文件是否已包含相同内容
+if grep -q "<name>tun2socks</name>" "$CONFIG_FILE" && grep -q "<name>clash</name>" "$CONFIG_FILE"; then
+    echo "服务列表已设置，跳过"
+else
+    # 找到第一个<service>标签的位置
+    FIRST_SERVICE_POS=$(grep -n "<service>" "$CONFIG_FILE" | head -n 1 | cut -d ":" -f 1)
+
+    # 如果找到了<service>标签，插入新的服务配置
+    if [ -n "$FIRST_SERVICE_POS" ]; then
+        # 使用 head 和 tail 精确控制文件内容插入，避免空行
+        {
+            head -n "$((FIRST_SERVICE_POS-1))" "$CONFIG_FILE"
+            printf "%s" "$NEW_SERVICES"  # 使用 printf 来避免额外的换行符
+            tail -n +"$FIRST_SERVICE_POS" "$CONFIG_FILE"
+        } > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+        echo "服务列表添加完成"
+    else
+        echo "配置文件中没有<service>字段，无法插入新的服务配置。"
+    fi
+fi
+echo " "
+
+# 添加任务列表 
+sleep 1
+log "$YELLOW" "添加任务列表项..."
+# 定义要添加的内容
+insert_cron_item() {
+  CMD="$1"
+  ITEM_XML="$2"
+
+  # 判断是否已存在相同的 <command> 条目
+  if grep -q "<command>$CMD</command>" "$CONFIG_FILE"; then
+    echo "任务已存在: $CMD，跳过插入。"
+    return
+  fi
+
+  echo "插入任务: $CMD"
+  echo "$ITEM_XML" > /tmp/cron_item.xml
+
+  if grep -q "<cron/>" "$CONFIG_FILE"; then
+    # 将 <cron/> 替换成 <cron>...item...<cron>
+    awk -v itemfile="/tmp/cron_item.xml" '
+      /<cron\/>/ {
+        print "<cron>"
+        while ((getline line < itemfile) > 0) print line
+        print "</cron>"
+        next
+      }
+      { print }
+    ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
+  elif grep -q "<cron>" "$CONFIG_FILE"; then
+    # 插入到 </cron> 之前
+    awk -v itemfile="/tmp/cron_item.xml" '
+      /<\/cron>/ {
+        while ((getline line < itemfile) > 0) print line
+      }
+      { print }
+    ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
+  else
+    echo "错误：未找到 <cron> 或 <cron/> 标签。" >&2
+  fi
+
+  rm -f /tmp/cron_item.xml
+}
+
+# 定义两个 cron item 内容
+ITEM1='        <item>
+            <minute>*</minute>
+            <hour>2</hour>
+            <mday>*</mday>
+            <month>*</month>
+            <wday>6</wday>
+            <who>root</who>
+            <command>sh /usr/local/etc/mosdns/scripts/update.sh</command>
+        </item>'
+
+ITEM2='        <item>
+            <minute>*</minute>
+            <hour>3</hour>
+            <mday>*</mday>
+            <month>*</month>
+            <wday>6</wday>
+            <who>root</who>
+            <command>/usr/bin/sub</command>
+        </item>'
+
+# 执行插入
+insert_cron_item "sh /usr/local/etc/mosdns/scripts/update.sh" "$ITEM1"
+insert_cron_item "/usr/bin/sub" "$ITEM2"
+echo ""
 
 # 重启所有服务
 sleep 1
