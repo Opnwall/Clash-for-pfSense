@@ -33,7 +33,7 @@ cp "$CONFIG_FILE" "$BACKUP_FILE" || {
     exit 1
 }
 
-for SERVICE in tun2socks mosdns clash; do
+for SERVICE in mosdns clash; do
   # 生成临时文件
   TMP_FILE=$(mktemp)
 
@@ -63,15 +63,12 @@ log "$YELLOW" "删除程序和配置，请稍等..."
 # 删除配置
 rm -rf /usr/local/etc/clash
 rm -rf /usr/local/etc/mosdns
-rm -rf /usr/local/etc/tun2socks
 
 # 删除rc.d
 rm -f /usr/local/etc/rc.d/clash
-rm -f /usr/local/etc/rc.d/tun2socks
 rm -f /usr/local/etc/rc.d/mosdns
 
 # 删除rc.conf
-rm -f /etc/rc.conf.d/tun2socks
 rm -f /etc/rc.conf.d/clash
 rm -f /etc/rc.conf.d/mosdns
 
@@ -81,18 +78,15 @@ rm -f /usr/local/share/pfSense/menu/pfSense-Services_Proxy.xml
 # 删除php
 rm -f /usr/local/www/services_clash.php
 rm -f /usr/local/www/services_mosdns.php
-rm -f /usr/local/www/services_tun2socks.php
 rm -f /usr/local/www/status_clash_logs.php
 rm -f /usr/local/www/status_clash.php
 rm -f /usr/local/www/status_mosdns_logs.php
 rm -f /usr/local/www/status_mosdns.php
-rm -f /usr/local/www/status_tun2socks_logs.php
-rm -f /usr/local/www/status_tun2socks.php
 rm -f /usr/local/www/sub.php
+rm -f /usr/bin/sub
 
 # 删除程序
 rm -f /usr/local/bin/clash
-rm -f /usr/local/bin/tun2socks
 rm -f /usr/local/bin/mosdns
 echo ""
 
@@ -105,5 +99,5 @@ log "$YELLOW" "重新应用所有更改，请稍等..."
 echo ""
 
 # 完成提示
-log "$GREEN" "卸载完成，请手动删除TUN接口和网关、别名和浮动防火墙分流规则，删除shellcmd中的启动项，任务列表的自动更新项，并将DNS解析器端口更改为53。"
+log "$GREEN" "卸载完成，请手动删除TUN接口和网关、别名和浮动防火墙分流规则，任务列表的自动更新项，删除shellcmd中的启动项，并将DNS解析器端口更改为53。"
 echo ""

@@ -1,8 +1,7 @@
 #!/bin/bash
 
-##############  代理安装脚本  #################
 echo -e ''
-echo -e "\033[32m====== clash for pfSense 代理全家桶一键安装脚本 ======\033[0m"
+echo -e "\033[32m====== clash for pfSense 代理一键安装脚本 ======\033[0m"
 echo -e ''
 
 # 定义颜色变量
@@ -17,7 +16,7 @@ ROOT="/usr/local"
 BIN_DIR="$ROOT/bin"
 WWW_DIR="$ROOT/www"
 CONF_DIR="$ROOT/etc"
-MODELS_DIR="$ROOT/share/pfSense/menu/"
+MENU_DIR="$ROOT/share/pfSense/menu/"
 RC_DIR="$ROOT/etc/rc.d"
 RC_CONF="/etc/rc.conf.d/"
 CONFIG_FILE="/cf/conf/config.xml"
@@ -32,24 +31,20 @@ log() {
 }
 
 # 创建目录
-mkdir -p "$CONF_DIR/clash/sub" "$CONF_DIR/clash/ui" "$CONF_DIR/tun2socks" "$CONF_DIR/mosdns" || log "$RED" "目录创建失败！"
+mkdir -p "$CONF_DIR/clash" "$CONF_DIR/mosdns" || log "$RED" "目录创建失败！"
 
 # 复制文件
 log "$YELLOW" "复制文件..."
 log "$YELLOW" "生成菜单..."
 log "$YELLOW" "添加权限..."
-chmod +x bin/*
-chmod +x rc.d/*
+chmod +x ./bin/* ./rc.d/*
 cp -f bin/* "$BIN_DIR/" || log "$RED" "bin 文件复制失败！"
 cp -f www/* "$WWW_DIR/" || log "$RED" "www 文件复制失败！"
-cp -f menu/* "$MODELS_DIR/" || log "$RED" "menu 文件复制失败！"
-cp -R -f sub/* "$CONF_DIR/clash/sub/" || log "$RED" "sub 文件复制失败！"
-cp -R -f ui/* "$CONF_DIR/clash/ui/" || log "$RED" "ui 文件复制失败！"
+cp -f rc.d/* "$RC_DIR/" || log "$RED" "rc.d 文件复制失败！"
+cp -f menu/* "$MENU_DIR/" || log "$RED" "menu 文件复制失败！"
+cp -f rc.conf/* "$RC_CONF/" || log "$RED" "rc.conf 文件复制失败！"
+cp -R -f conf/* "$CONF_DIR/clash/" || log "$RED" "conf 文件复制失败！"
 cp -R -f mosdns/* "$CONF_DIR/mosdns/" || log "$RED" "mosdns 文件复制失败！"
-cp rc.d/* "$RC_DIR/" || log "$RED" "rc.d 文件复制失败！"
-cp geo/* "$CONF_DIR/clash/" || log "$RED" "geo 文件复制失败！"
-cp conf/config_clash.yaml "$CONF_DIR/clash/config.yaml" || log "$RED" "clash 配置文件复制失败！"
-cp conf/config_tun2socks.yaml "$CONF_DIR/tun2socks/config.yaml" || log "$RED" "tun2socks 配置文件复制失败！"
 
 # 安装bash
 sleep 1
@@ -78,10 +73,6 @@ bash /usr/local/etc/clash/sub/sub.sh
 EOF
 chmod +x /usr/bin/sub
 
-# 添加服务启动项
-log "$YELLOW" "配置系统服务..."
-cp -f rc.conf/* "$RC_CONF/" || log "$RED" "rc.conf 文件复制失败！"
-
 # 备份现有配置
 log "$YELLOW" "备份配置文件..."
 cp "$CONFIG_FILE" "$BACKUP_FILE" || {
@@ -90,8 +81,8 @@ cp "$CONFIG_FILE" "$BACKUP_FILE" || {
 }
 
 # 启动Tun接口
-log "$YELLOW" "启动Tun2Socks..."
-service tun2socks start > /dev/null 2>&1
+log "$YELLOW" "启动clash..."
+service clash start > /dev/null 2>&1
 echo ""
 
 # 添加Tun接口
@@ -136,6 +127,7 @@ else
     print "      <weight>1</weight>"
     print "      <ipprotocol>inet</ipprotocol>"
     print "      <descr></descr>"
+    print "      <monitor_disable></monitor_disable>"
     print "      <gw_down_kill_states></gw_down_kill_states>"
     print "    </gateway_item>"
     next
@@ -314,11 +306,6 @@ else
     print "      <cmdtype>shellcmd</cmdtype>"
     print "      <description></description>"
     print "    </config>"
-    print "    <config>"
-    print "      <cmd>service tun2socks start</cmd>"
-    print "      <cmdtype>shellcmd</cmdtype>"
-    print "      <description></description>"
-    print "    </config>"
     next
   }
   { print }
@@ -330,7 +317,6 @@ else
 awk '
 /<\/system>/ && !inserted {
    print "		<shellcmd>service clash start</shellcmd>"
-   print "		<shellcmd>service tun2socks start</shellcmd>"
    print "		<shellcmd>service mosdns start</shellcmd>"
    inserted = 1
 }
@@ -429,7 +415,7 @@ insert_cron_item() {
 
 # 定义两个 cron item 内容
 ITEM1='        <item>
-            <minute>*</minute>
+            <minute>0</minute>
             <hour>2</hour>
             <mday>*</mday>
             <month>*</month>
@@ -439,7 +425,7 @@ ITEM1='        <item>
         </item>'
 
 ITEM2='        <item>
-            <minute>*</minute>
+            <minute>0</minute>
             <hour>3</hour>
             <mday>*</mday>
             <month>*</month>
@@ -456,9 +442,11 @@ echo ""
 # 重启所有服务
 sleep 1
 log "$YELLOW" "正在应用所有更改，请稍等..."
-/etc/rc.reload_all >/dev/null 2>&1
-echo "所有服务已重新加载"
-echo ""
+if /etc/rc.reload_all >/dev/null 2>&1; then
+  log "$GREEN" "所有服务已重新加载"
+else
+  log "$RED" "服务重载失败，请手动检查"
+fi
 
 # 完成提示
 sleep 1

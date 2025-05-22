@@ -7,64 +7,20 @@
 . /etc/rc.subr
 
 name="mosdns"
-rcvar="mosdns_enable"
+rcvar="mosdns_enable"  # 允许通过 rc.conf 控制启用
 
 pidfile="/var/run/${name}.pid"
 logfile="/var/log/${name}.log"
 command="/usr/sbin/daemon"
-mosdns_env="IS_DAEMON=1"
+mosdns_env="IS_DAEMON=1"  # 设置环境变量
 
+# daemon 参数
 daemon_args="-P ${pidfile} -r -f -o ${logfile} -t ${name}:daemon"
-command_args="${daemon_args} env ${mosdns_env} /usr/local/bin/mosdns start \
-    --as-service \
-    -d /usr/local/etc/mosdns/"
+# mosdns 启动命令
+command_args="${daemon_args} /usr/local/bin/mosdns start --as-service -d /usr/local/etc/mosdns/"
 
+# 加载用户定义的配置
 load_rc_config $name
-: ${mosdns_enable:="NO"}
-
-start_precmd="mosdns_prestart"
-mosdns_prestart()
-{
-    if [ ! -f /usr/local/etc/mosdns/config.yaml ]; then
-        echo "Error: Config file /usr/local/etc/mosdns/config.yaml not found!"
-        return 1
-    fi
-    [ -d /var/log ] || mkdir -p /var/log
-    touch ${logfile}
-    if id mosdns >/dev/null 2>&1; then
-        chown mosdns:mosdns ${logfile}
-    fi
-    chmod 640 ${logfile}
-    return 0
-}
-
-status_cmd="mosdns_status"
-mosdns_status()
-{
-    if [ -f ${pidfile} ]; then
-        pid=$(cat ${pidfile})
-        if pgrep -F ${pidfile} >/dev/null 2>&1; then
-            echo "mosdns is running as PID ${pid}."
-            return 0
-        else
-            echo "mosdns is not running (stale PID file)."
-            return 1
-        fi
-    else
-        echo "mosdns is not running."
-        return 1
-    fi
-}
-
-stop_cmd="mosdns_stop"
-mosdns_stop()
-{
-    if [ -f ${pidfile} ]; then
-        kill $(cat ${pidfile}) && echo "mosdns stopped."
-        rm -f ${pidfile}
-    else
-        echo "mosdns is not running."
-    fi
-}
+: ${mosdns_enable:="NO"}  # 默认不启用
 
 run_rc_command "$1"
