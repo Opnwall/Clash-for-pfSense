@@ -1,20 +1,13 @@
 ## Clash for pfSense
-Clash安装工具，用于运行Clash、Tun2socks、Mosdns，在pfSense上实现透明代理。支持Clash订阅转换、DNS分流。带Web控制界面，可以进行配置修改、程序控制、日志查看。 在pfSense plus 25.03(beta)上测试通过。
+Clash安装工具，在pfSense上运行Clash、Mosdns，实现透明代理。支持Clash订阅、DNS分流。带Web控制界面，可以进行配置修改、程序控制、日志查看。在pfSense plus 25.03(beta)上测试通过。
 
 ![](images/proxy.png)
 
-## 项目源代码
-该项目集成了以下工具：
+## 集成程序
 
-[Mosdns](https://github.com/IrineSistiana/mosdns) 
+[MosDNS](https://github.com/IrineSistiana/mosdns) 
 
-[MetaCubeXD](https://github.com/MetaCubeX/metacubexd) 
-
-[Subconverter](https://github.com/tindy2013/subconverter)
-
-[clash (mihomo)](https://github.com/MetaCubeX/mihomo/releases) 
-
-[hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel)
+[Mihomo_tun](https://github.com/Vincent-Loeng/mihomo) 
 
 ## 注意事项
 1. 当前仅支持x86_64 平台。
@@ -42,6 +35,3 @@ sh uninstall.sh
 请参考以下文章：
 
 [pfSense、OPNsense安装配置Clash透明代理教程](https://pfchina.org/?p=14148)
-
-## 常见问题
-如果订阅转换不起作用，可以使用[SublinkX](https://github.com/gooaclok819/sublinkX)工具搭建自己的订阅转换平台。
