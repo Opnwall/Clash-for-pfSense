@@ -2,23 +2,23 @@ port: 7890
 socks-port: 7891
 mode: rule
 ipv6: true
-tun:
-  enable: true
-  stack: gvisor
-  device: tun_3000
-  auto-route: false
-  auto-detect-interface: true
-  dns-hijack:
-    - any:53
-    - tcp://any:53
-  strict-route: true
-  mtu: 1500
-log-level: info
+log-level: error
 unified-delay: true
 global-client-fingerprint: chrome
 external-controller: '0.0.0.0:9090'
 external-ui: /usr/local/etc/clash/ui
 secret: 123456
+tun:
+  enable: true
+  stack: gvisor
+  device: tun_3000
+  mtu: 9000
+  auto-route: false
+  strict-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - any:53
+    - tcp://any:53
 dns:
   enable: true
   listen: 0.0.0.0:53
@@ -38,3 +38,15 @@ dns:
     geoip-code: CN
     ipcidr:
       - 240.0.0.0/4
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - "+.push.apple.com"
