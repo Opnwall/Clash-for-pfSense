@@ -16,16 +16,14 @@ Clash安装工具，在pfSense上运行Clash、Mosdns，实现透明代理。支
 4. 脚本已集成了可用的默认配置，只需替换clash的proxies和rule部分配置即可使用。
 5. 为减少长期运行保存的日志数量，在调试完成后，请将所有配置的日志类型修改为error或warn。
 
-## 安装方法
-下载后解压，上传到防火墙根目录，进入安装目录，运行以下命令安装：
+## 安装命令
 
 ```bash
 sh install.sh
 ```
 ![](images/install.png)
 
-## 卸载方法
-运行以下命令卸载：
+## 卸载命令
 
 ```bash
 sh uninstall.sh
