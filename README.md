@@ -30,6 +30,5 @@ sh uninstall.sh
 ```
 
 ## 使用方法
-请参考以下文章：
 
-[pfSense配置clash(mihomo)透明代理教程](https://pfchina.org/?p=10526)
+[pfSense 配置 clash(mihomo) 透明代理教程](https://pfchina.org/?p=10526)
