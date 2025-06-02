@@ -7,7 +7,7 @@ Clash安装工具，在pfSense上运行Clash、Mosdns，实现透明代理。支
 
 [MosDNS](https://github.com/IrineSistiana/mosdns) 
 
-[[Vincent-Loeng大佬魔改Mihomo](https://github.com/Vincent-Loeng/mihomo) 
+[Vincent-Loeng大佬魔改Mihomo](https://github.com/Vincent-Loeng/mihomo) 
 
 ## 注意事项
 1. 当前仅支持x86_64 平台。
