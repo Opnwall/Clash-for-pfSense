@@ -29,6 +29,6 @@ sh install.sh
 sh uninstall.sh
 ```
 
-## 配置方法
+## 使用教程
 
 [pfSense 配置 clash(mihomo) 透明代理教程](https://pfchina.org/?p=10526)
