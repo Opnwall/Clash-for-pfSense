@@ -17,48 +17,13 @@ log() {
     echo -e "${color}${message}${RESET}"
 }
 
-
-# 删除服务项
-CONFIG_FILE="/cf/conf/config.xml"
-BACKUP_FILE="/cf/conf/config.xml.bak.$(date +%F-%H%M%S)"
-
-[ -f "$CONFIG_FILE" ] || {
-    log "$RED" "配置文件不存在：$CONFIG_FILE"
-    exit 1
-}
-
-log "$YELLOW" "备份配置文件..."
-cp "$CONFIG_FILE" "$BACKUP_FILE" || {
-    log "$RED" "备份失败"
-    exit 1
-}
-
-for SERVICE in mosdns clash; do
-  # 生成临时文件
-  TMP_FILE=$(mktemp)
-
-  awk -v service="$SERVICE" '
-    BEGIN { keep = 1 }
-    /<service>/ { block = ""; in_block = 1 }
-    in_block {
-      block = block $0 "\n"
-      if (/<\/service>/) {
-        in_block = 0
-        if (block ~ "<name>" service "</name>") {
-          next
-        } else {
-          printf "%s", block
-        }
-      }
-      next
-    }
-    { print }
-  ' "$CONFIG_FILE" > "$TMP_FILE" && mv "$TMP_FILE" "$CONFIG_FILE"
-done
-echo ""
-
 # 删除程序和配置
 log "$YELLOW" "删除程序和配置，请稍等..."
+
+
+# 停止服务
+service clash stop > /dev/null 2>&1
+service mosdns stop > /dev/null 2>&1
 
 # 删除配置
 rm -rf /usr/local/etc/clash
@@ -90,14 +55,7 @@ rm -f /usr/local/bin/clash
 rm -f /usr/local/bin/mosdns
 echo ""
 
-log "$YELLOW" "删除完成，配置已保存为：$BACKUP_FILE"
-echo ""
-
-# 重启所有服务
-log "$YELLOW" "重新应用所有更改，请稍等..."
-/etc/rc.reload_all >/dev/null 2>&1
-echo ""
-
 # 完成提示
-log "$GREEN" "卸载完成，请手动删除TUN接口和网关、别名和浮动防火墙分流规则，任务列表的自动更新项，删除shellcmd中的启动项，并将DNS解析器端口更改为53。"
+log "$GREEN" "卸载完成，请手动删除TUN接口和网关、别名和防火墙分流规则，任务列表的自动更新项，删除shellcmd中的启动项，并将DNS解析器端口更改为53。"
+log "$GREEN" "所有配置修改完成以后，运行/etc/rc.reload_all或重启防火墙，让新配置生效。"
 echo ""
