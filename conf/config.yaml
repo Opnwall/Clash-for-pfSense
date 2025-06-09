@@ -10,7 +10,7 @@ external-ui: /usr/local/etc/clash/ui
 secret: 123456
 tun:
   enable: true
-  stack: gvisor   #当前在pfSense上不能设置为system。
+  stack: gvisor   #在pfSense上不能设置为system。
   device: tun_3000
   mtu: 9000
   auto-route: false
