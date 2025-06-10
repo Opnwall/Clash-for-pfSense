@@ -13,7 +13,7 @@ tun:
   stack: gvisor   #在pfSense上不能设置为system。
   device: tun_3000
   mtu: 9000
-  auto-route: false
+  auto-route: false #可以设置为true
   strict-route: true
   auto-detect-interface: true
   dns-hijack:
